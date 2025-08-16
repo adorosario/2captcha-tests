@@ -47,3 +47,10 @@ pytest -q -m e2e
 
 ## Ethics & Terms
 Only run against sites you own or have explicit permission to test. Many sites (e.g., Upwork) prohibit automated login and scraping in their Terms of Service. Passing Turnstile **does not** guarantee access when Cloudflare Bot Management and device fingerprinting are present.
+
+## Contributing & CI
+- Contributor guide: see `AGENTS.md` for project structure, commands, style, and PR expectations.
+- CI: GitHub Actions workflow lives at `.github/workflows/tests.yml`.
+  - Smoke job runs `pytest -m smoke` on pushes/PRs to `main` (Python 3.10–3.12).
+  - E2E job is optional; enable by adding repo variable `RUN_E2E=1`.
+  - Add secret `TWOCAPTCHA_API_KEY` under Settings → Secrets and variables → Actions → Secrets.
