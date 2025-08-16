@@ -26,8 +26,17 @@ Alternatively, to keep a long-running container:
   - `export RUN_CF_CHALLENGE_TEST=1`
   - `pytest -m cloudflare_challenge -q`
 
+## Quick one-liners (no interactive shell)
+- Smoke:
+  - `docker compose run --rm tests bash -lc "pytest -m smoke -q"`
+- E2E:
+  - `docker compose run --rm tests bash -lc "pytest -m e2e -q"`
+- Challenge:
+  - `docker compose run --rm -e RUN_CF_CHALLENGE_TEST=1 tests bash -lc "pytest -m cloudflare_challenge -q"`
+- All tests:
+  - `docker compose run --rm tests bash -lc "pytest -q"`
+
 ## Notes
 - The image is based on Playwright’s Python base, so E2E tests work without extra system deps.
 - Local files `tests/.env` and root `.env` are both ignored by Git; do not commit secrets.
 - If you prefer not to mount the repo, copy files in a custom Dockerfile stage instead.
-
