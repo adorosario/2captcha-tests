@@ -1,16 +1,28 @@
-version: "3.9"
-
 services:
   tests:
-    build: .
-    image: twocaptcha-tests:latest
+    build:
+      context: .
+      target: base
+    image: twocaptcha-tests:smoke
     working_dir: /app
     volumes:
       - ./:/app
-    # Pull environment variables from project .env (root)
     env_file:
       - .env
-    stdin_open: true  # keep STDIN open for interactive bash
-    tty: true         # allocate a pseudo-TTY
+    stdin_open: true
+    tty: true
     command: ["/bin/bash"]
 
+  e2e:
+    build:
+      context: .
+      target: e2e
+    image: twocaptcha-tests:e2e
+    working_dir: /app
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash"]
