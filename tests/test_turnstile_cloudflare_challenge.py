@@ -46,7 +46,51 @@ def test_cloudflare_challenge_flow(client):
                 pass
 
         browser = p.chromium.launch(**launch_kwargs)
-        context = browser.new_context()
+
+        # Device fingerprint overrides
+        device_name = os.getenv("PLAYWRIGHT_DEVICE")  # e.g., "Pixel 7" or "iPhone 12"
+        device_kwargs = {}
+        if device_name:
+            try:
+                device_kwargs.update(p.devices.get(device_name, {}))
+            except Exception:
+                pass
+
+        # Explicit overrides
+        ua = os.getenv("CF_USER_AGENT")
+        if ua:
+            device_kwargs["user_agent"] = ua
+        locale = os.getenv("CF_LOCALE")  # e.g., en-US
+        if locale:
+            device_kwargs["locale"] = locale
+        tz = os.getenv("CF_TIMEZONE")  # e.g., America/New_York
+        if tz:
+            device_kwargs["timezone_id"] = tz
+        dpr = os.getenv("CF_DPR")
+        if dpr:
+            try:
+                device_kwargs["device_scale_factor"] = float(dpr)
+            except Exception:
+                pass
+        if os.getenv("CF_MOBILE") == "1":
+            device_kwargs["is_mobile"] = True
+        if os.getenv("CF_HAS_TOUCH") == "1":
+            device_kwargs["has_touch"] = True
+        vp = os.getenv("CF_VIEWPORT")  # e.g., 1280x800
+        if vp and "x" in vp:
+            try:
+                w, h = vp.lower().split("x", 1)
+                device_kwargs["viewport"] = {"width": int(w), "height": int(h)}
+            except Exception:
+                pass
+        # Accept-Language via headers if locale provided
+        extra_headers = {}
+        if locale:
+            extra_headers["Accept-Language"] = locale.replace("_", "-") + ",en;q=0.9"
+        if extra_headers:
+            device_kwargs["extra_http_headers"] = extra_headers
+
+        context = browser.new_context(**device_kwargs)
         page = context.new_page()
 
         # Inject hook to capture params

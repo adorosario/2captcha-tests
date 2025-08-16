@@ -50,12 +50,31 @@ Environment toggles to help reproduce a challenge:
 - `HEADFUL=1`: run Chromium headful (requires X or use `xvfb-run`).
 - `CF_CHALLENGE_URL=https://your-page.example`: override target URL.
 - `PLAYWRIGHT_PROXY=http://user:pass@host:port`: route via proxy.
-- `CF_WAIT_MS=8000`: wait longer for params capture.
+- `CF_WAIT_MS=12000`: wait longer for params capture.
 - `SKIP_IF_NO_CHALLENGE=1`: skip instead of fail when no challenge is shown.
+- Device fingerprint (optional):
+  - `PLAYWRIGHT_DEVICE="Pixel 7"` (or any Playwright device name)
+  - `CF_USER_AGENT="...Chrome/124..."`
+  - `CF_LOCALE=en-US` (also sets `Accept-Language` header)
+  - `CF_TIMEZONE=America/New_York`
+  - `CF_VIEWPORT=1280x800` `CF_DPR=1.0` `CF_MOBILE=1` `CF_HAS_TOUCH=1`
 
 Example in Docker (headful via virtual display):
 ```bash
 docker compose run --rm e2e bash -lc 'export RUN_CF_CHALLENGE_TEST=1 HEADFUL=1 CF_WAIT_MS=8000; xvfb-run -a pytest -m cloudflare_challenge -q'
+```
+
+Example with proxy + device:
+```bash
+docker compose run --rm e2e bash -lc '
+  export RUN_CF_CHALLENGE_TEST=1 \
+         CF_WAIT_MS=12000 \
+         SKIP_IF_NO_CHALLENGE=1 \
+         CF_CHALLENGE_URL=https://your-page.example \
+         PLAYWRIGHT_PROXY=http://user:pass@res-proxy:port \
+         PLAYWRIGHT_DEVICE="Pixel 7" \
+         CF_LOCALE=en-US CF_TIMEZONE=America/New_York; \
+  xvfb-run -a pytest -m cloudflare_challenge -q'
 ```
 
 ## Adapting to your repo
