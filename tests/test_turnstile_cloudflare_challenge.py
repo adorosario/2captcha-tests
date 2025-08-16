@@ -22,8 +22,10 @@ def test_cloudflare_challenge_flow(client):
 
     target = "https://2captcha.com/demo/cloudflare-turnstile"  # If a page shows a challenge
 
+    headful = os.getenv("HEADFUL") == "1"
+
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=not headful)
         context = browser.new_context()  # add proxy here if needed
         page = context.new_page()
 
