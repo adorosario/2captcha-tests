@@ -20,13 +20,33 @@ def test_cloudflare_challenge_flow(client):
     pytest.importorskip("playwright.sync_api")
     from playwright.sync_api import sync_playwright
 
-    target = "https://2captcha.com/demo/cloudflare-turnstile"  # If a page shows a challenge
+    # Allow overriding the target to a page that reliably shows a CF challenge
+    target = os.getenv("CF_CHALLENGE_URL", "https://2captcha.com/demo/cloudflare-turnstile")
 
     headful = os.getenv("HEADFUL") == "1"
+    wait_ms = int(os.getenv("CF_WAIT_MS", "5000"))
+    skip_if_none = os.getenv("SKIP_IF_NO_CHALLENGE") == "1"
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=not headful)
-        context = browser.new_context()  # add proxy here if needed
+        # Optional proxy for increasing challenge likelihood; format: http(s)://user:pass@host:port
+        proxy_url = os.getenv("PLAYWRIGHT_PROXY")
+        launch_kwargs = {"headless": not headful}
+        if proxy_url:
+            try:
+                from urllib.parse import urlparse
+                u = urlparse(proxy_url)
+                server = f"{u.scheme}://{u.hostname}:{u.port}" if u.hostname and u.port else f"{u.scheme}://{u.hostname}"
+                proxy_cfg = {"server": server}
+                if u.username:
+                    proxy_cfg["username"] = u.username
+                if u.password:
+                    proxy_cfg["password"] = u.password
+                launch_kwargs["proxy"] = proxy_cfg
+            except Exception:
+                pass
+
+        browser = p.chromium.launch(**launch_kwargs)
+        context = browser.new_context()
         page = context.new_page()
 
         # Inject hook to capture params
@@ -52,9 +72,11 @@ def test_cloudflare_challenge_flow(client):
         """
         page.add_init_script(hook)
         page.goto(target)
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(wait_ms)
 
         params = page.evaluate("() => window.__CF_PARAMS__ || null")
+        if not params and skip_if_none:
+            pytest.skip("No CF challenge shown; skipping per SKIP_IF_NO_CHALLENGE=1")
         assert params, "Could not capture Cloudflare Turnstile challenge parameters; no challenge shown?"
 
         task = {
