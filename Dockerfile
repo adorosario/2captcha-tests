@@ -9,8 +9,8 @@ WORKDIR /app
 
 # Install test dependencies
 RUN python -m pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir pytest requests python-dotenv
+    && pip install --no-cache-dir pytest requests python-dotenv playwright \
+    && python -m playwright install --with-deps chromium
 
 # Default to bash; docker compose will override/attach TTY
 CMD ["/bin/bash"]
-
