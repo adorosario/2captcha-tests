@@ -32,11 +32,16 @@ pytest -q tests
 ```
 To run only basic smoke tests (no browser):
 ```bash
-pytest -q -m "not e2e"
+pytest -q -m smoke
 ```
 To run only Playwright-based E2E demo tests:
 ```bash
 pytest -q -m e2e
+```
+
+To print your current 2Captcha balance under pytest:
+```bash
+pytest -q -s tests/test_balance_print.py
 ```
 
 ## Adapting to your repo

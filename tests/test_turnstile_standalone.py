@@ -8,7 +8,7 @@ DEMO_URL = "https://2captcha.com/demo/cloudflare-turnstile"
 # As per docs, public test sitekey is 3x00000000000000000000FF for Turnstile demo pages.
 DEMO_SITEKEY = "3x00000000000000000000FF"
 
-@pytest.mark.smoke
+@pytest.mark.e2e
 def test_turnstile_token_solve(client):
     task = {
         "type": "TurnstileTaskProxyless",

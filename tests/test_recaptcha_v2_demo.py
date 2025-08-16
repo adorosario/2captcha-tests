@@ -10,7 +10,7 @@ DEMO_URL = "https://2captcha.com/demo/recaptcha-v2"
 # From 2Captcha docs (subject to change, we try the DOM first in the E2E test)
 DEMO_SITEKEY = "6LfD3PIbAAAAAJs_eEHvoOl75_83eXSqpPSRFJ_u"
 
-@pytest.mark.smoke
+@pytest.mark.e2e
 def test_recaptcha_v2_token_solve(client):
     task = {
         "type": "RecaptchaV2TaskProxyless",
