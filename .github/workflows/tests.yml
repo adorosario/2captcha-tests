@@ -1,0 +1,54 @@
+name: tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: smoke (pytest -m smoke)
+    runs-on: ubuntu-latest
+    env:
+      TWOCAPTCHA_API_KEY: ${{ secrets.TWOCAPTCHA_API_KEY }}
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest requests python-dotenv
+      - name: Run smoke tests
+        run: |
+          pytest -m smoke -q
+
+  e2e:
+    name: e2e (optional)
+    if: ${{ vars.RUN_E2E == '1' }}
+    runs-on: ubuntu-latest
+    env:
+      TWOCAPTCHA_API_KEY: ${{ secrets.TWOCAPTCHA_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies (Playwright)
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest requests python-dotenv playwright
+          python -m playwright install --with-deps chromium
+      - name: Run e2e tests
+        run: |
+          pytest -m e2e -q
+
